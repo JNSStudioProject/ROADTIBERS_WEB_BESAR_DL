@@ -44,8 +44,8 @@ export default function Home() {
         <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-[#06B6D4]/10 blur-[100px] rounded-full pointer-events-none" />
 
         {/* HERO */}
-        <section className="relative pt-40 pb-20 lg:pt-48 lg:pb-32 flex flex-col items-center justify-center z-10 min-h-[90vh]">
-          <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center gap-10">
+        <section className="relative pt-32 pb-12 lg:pt-36 lg:pb-20 flex flex-col items-center justify-center z-10 min-h-[80vh]">
+          <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center gap-8">
             
             <MotionSection direction="up" delay={0.1}>
               <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md shadow-sm">
@@ -209,7 +209,7 @@ export default function Home() {
             </Link>
           </ScrollRevealRow>
 
-          <ScrollRevealRow direction="up" delay={0.1}>
+          <ScrollRevealRow direction="left" delay={0.1}>
             <InteractiveGlassCard intensity="dark" glow className="p-8 sm:p-10 !bg-[#061426] !backdrop-blur-3xl shadow-2xl relative overflow-hidden rounded-[2.5rem]">
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none translate-x-1/3 -translate-y-1/3" />
               
@@ -260,7 +260,7 @@ export default function Home() {
               </InteractiveGlassCard>
             </ScrollRevealRow>
 
-            <ScrollRevealRow direction="up" delay={0.2} className="flex-1 w-full relative z-10">
+            <ScrollRevealRow direction="right" delay={0.2} className="flex-1 w-full relative z-10">
               <InteractiveGlassCard intensity="subtle" className="flex flex-col items-center gap-5 p-10 bg-white border border-slate-100 text-center shadow-[0_8px_32px_rgba(0,0,0,0.02)] hover:shadow-lg transition-shadow rounded-[2rem]">
                 <div className="w-12 h-12 rounded-2xl bg-[#EFF6FF] shadow-inner flex items-center justify-center text-sm font-bold text-[#1D4ED8]">2</div>
                 <div>
@@ -270,7 +270,7 @@ export default function Home() {
               </InteractiveGlassCard>
             </ScrollRevealRow>
 
-            <ScrollRevealRow direction="left" delay={0.3} className="flex-1 w-full relative z-10">
+            <ScrollRevealRow direction="right" delay={0.3} className="flex-1 w-full relative z-10">
               <InteractiveGlassCard intensity="dark" glow className="flex flex-col items-center gap-5 p-10 !bg-[#061426] text-center shadow-2xl rounded-[2rem]">
                 <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-sm font-bold text-white shadow-inner">3</div>
                 <div>

@@ -71,10 +71,13 @@ export function InteractiveGlassCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        setRotation({ x: 0, y: 0 });
+        requestAnimationFrame(() => {
+          setRotation({ x: 0, y: 0 });
+          setMousePos({ x: 50, y: 50 });
+        });
       }}
       className={cn(
-        "relative rounded-3xl transition-transform duration-200 ease-out overflow-hidden",
+        "relative rounded-3xl transition-transform duration-300 ease-out overflow-hidden",
         baseIntensityClass,
         className
       )}

@@ -236,14 +236,11 @@
     border-top-right-radius: inherit;
   }
 
-  /* Full dark navy stage */
+  /* Full dark navy stage - simple and professional */
   .rt-navy-stage {
     background-color: #061426;
     background-image: 
-      radial-gradient(circle at 50% 0%, rgba(29, 78, 216, 0.15) 0%, transparent 60%),
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
+      radial-gradient(circle at 50% 0%, rgba(29, 78, 216, 0.2) 0%, transparent 50%);
   }
 
   /* Smooth light transition */
