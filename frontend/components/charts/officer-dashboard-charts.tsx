@@ -38,24 +38,24 @@ export function TrafficVolumeChart() {
             dataKey="time" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: "#475569", fontSize: 13, fontWeight: 700 }}
+            tick={{ fill: "#475569", fontSize: 13, fontWeight: 500 }}
             dy={10}
           />
           <YAxis 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: "#475569", fontSize: 13, fontWeight: 700 }}
+            tick={{ fill: "#475569", fontSize: 13, fontWeight: 500 }}
           />
           <Tooltip 
             contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", padding: "12px" }}
-            labelStyle={{ fontWeight: 800, color: "#0f172a", marginBottom: "4px" }}
-            itemStyle={{ fontWeight: 700, color: "#1d4ed8", fontSize: "14px" }}
+            labelStyle={{ fontWeight: 600, color: "#0f172a", marginBottom: "4px" }}
+            itemStyle={{ fontWeight: 500, color: "#1d4ed8", fontSize: "14px" }}
           />
           <Legend 
             verticalAlign="top" 
             height={36} 
             iconType="circle"
-            wrapperStyle={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}
+            wrapperStyle={{ fontSize: '13px', fontWeight: 500, color: '#334155' }}
           />
           <Line 
             type="monotone" 
@@ -82,21 +82,21 @@ export function ViolationDistributionChart() {
             type="number"
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: "#475569", fontSize: 13, fontWeight: 700 }}
+            tick={{ fill: "#475569", fontSize: 13, fontWeight: 500 }}
           />
           <YAxis 
             dataKey="name" 
             type="category"
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: "#0B1F3A", fontSize: 13, fontWeight: 800 }}
+            tick={{ fill: "#0B1F3A", fontSize: 13, fontWeight: 500 }}
             width={100}
           />
           <Tooltip 
             cursor={{ fill: "#f1f5f9" }}
             contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", padding: "12px" }}
-            labelStyle={{ fontWeight: 800, color: "#0f172a", marginBottom: "4px" }}
-            itemStyle={{ fontWeight: 700, color: "#0f172a", fontSize: "14px" }}
+            labelStyle={{ fontWeight: 600, color: "#0f172a", marginBottom: "4px" }}
+            itemStyle={{ fontWeight: 500, color: "#0f172a", fontSize: "14px" }}
             formatter={(value) => [`${value} Kasus`, "Jumlah"]}
           />
           <Bar dataKey="count" name="Jumlah Kasus" radius={[0, 6, 6, 0]} isAnimationActive={false} barSize={32}>
