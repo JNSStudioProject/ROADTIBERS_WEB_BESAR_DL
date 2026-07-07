@@ -58,12 +58,12 @@ export function InteractiveGlassCard({
 
   const baseIntensityClass =
     intensity === "dark"
-      ? "rt-liquid-dark rt-liquid-gloss"
+      ? "rt-liquid-bright rt-liquid-gloss-light"
       : intensity === "strong"
-      ? "bg-white/90 backdrop-blur-xl border-slate-200/50 shadow-md"
+      ? "bg-white/80 backdrop-blur-2xl border-white/80 shadow-md"
       : intensity === "medium"
-      ? "bg-white/70 backdrop-blur-md border-slate-200/50 shadow-sm"
-      : "bg-white/50 backdrop-blur-sm border-slate-200/40";
+      ? "bg-white/60 backdrop-blur-md border-white/60 shadow-sm"
+      : "bg-white/40 backdrop-blur-sm border-white/40";
 
   return (
     <div
