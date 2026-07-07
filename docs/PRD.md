@@ -62,6 +62,50 @@ RoadTierbers **tidak boleh meniru Apple secara identik**, tetapi mengambil prins
 - Elegant transitions.
 - High readability.
 
+### Apple-Inspired Premium Interaction Direction
+
+#### 1. Typography
+
+- Use an Apple-like system font stack.
+- Do not bundle Apple font files or any proprietary typefaces.
+- Reference fonts as system/local only: `-apple-system`, `BlinkMacSystemFont`, `"SF Pro Display"`, `"SF Pro Text"`, `"Segoe UI"`, `system-ui`, `sans-serif`.
+- Use large, confident headings with tight letter-spacing.
+- Use short copy and strong visual hierarchy.
+- Body text must remain comfortable and highly readable at all screen sizes.
+
+#### 2. Liquid Glass-Inspired Material
+
+- Use translucent panels with subtle backdrop blur.
+- Use hairline borders (`1px solid rgba(255,255,255,0.2)` or similar).
+- Use soft highlights and inner glow to suggest depth.
+- Layer surfaces intentionally to create visual depth.
+- Avoid excessive glassmorphism — never sacrifice readability for effect.
+- Readability always takes priority over translucency.
+
+#### 3. Velocity Flow-Style Motion
+
+- Use smooth entrance transitions (fade + slight translate).
+- Use scroll-aware section rhythm — content reveals as user scrolls.
+- Use staggered reveal animations for lists and grid sections.
+- Use subtle parallax-like movement only where safe and non-distracting.
+- Do not use heavy or excessive animation.
+- Always respect `prefers-reduced-motion` media query.
+
+#### 4. Overlapping Sections
+
+- Use layered cards and sections with controlled overlap to create visual depth.
+- Use negative margins carefully and intentionally.
+- Use sticky or floating preview panels only when they improve the user experience.
+- Avoid messy stacking — every overlap must serve a purpose.
+- All content must remain readable regardless of overlap.
+
+#### 5. Design Outcome
+
+- RoadTierbers should feel like a premium traffic intelligence product, not a template.
+- Public pages should feel like Apple-style product storytelling — calm, confident, persuasive.
+- Officer pages should feel like a premium command center with clean, functional glass panels.
+- Every screen should feel like it belongs to a single, coherent visual system.
+
 ---
 
 ## 4. Visual Style

@@ -49,6 +49,7 @@
 }
 
 :root {
+  /* shadcn base */
   --background: oklch(0.99 0.005 286);
   --foreground: oklch(0.12 0.01 260);
   --card: oklch(1 0 0);
@@ -81,6 +82,18 @@
   --sidebar-accent-foreground: oklch(0.15 0.03 260);
   --sidebar-border: oklch(0.90 0.01 260);
   --sidebar-ring: oklch(0.25 0.05 260);
+
+  /* RoadTierbers brand */
+  --rt-navy: #0b1f3a;
+  --rt-command-blue: #1d4ed8;
+  --rt-soft-blue: #eff6ff;
+  --rt-cyan: #06b6d4;
+  --rt-teal: #14b8a6;
+  --rt-surface: #f5f7fa;
+  --rt-success: #16a34a;
+  --rt-warning: #d97706;
+  --rt-danger: #dc2626;
+  --rt-neutral: #475569;
 }
 
 .dark {
@@ -121,10 +134,90 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground tracking-tight antialiased;
-  }
+
   html {
-    @apply font-sans;
+    scroll-behavior: smooth;
+    /* Apple-inspired system font stack — no proprietary files bundled */
+    font-family:
+      var(--font-geist-sans, "Geist"),
+      -apple-system,
+      BlinkMacSystemFont,
+      "SF Pro Display",
+      "SF Pro Text",
+      "Segoe UI",
+      system-ui,
+      sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-color: var(--rt-surface, #f5f7fa);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight font-semibold;
+  }
+
+  ::selection {
+    background-color: #eff6ff;
+    color: #0b1f3a;
+  }
+}
+
+/* ─── Liquid glass utility ───────────────────────────────────────────── */
+@layer utilities {
+  /* Subtle glass: navigation bars, cards on light backgrounds */
+  .rt-liquid-glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.05),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  /* Soft inner highlight for glass panels */
+  .rt-glass-highlight {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.04),
+      0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Controlled section overlap — apply to the section that should lift */
+  .rt-section-overlap {
+    position: relative;
+    z-index: 1;
+    margin-top: -3rem;
+  }
+
+  /* Subtle background grid for premium sections */
+  .rt-soft-grid {
+    background-image:
+      linear-gradient(rgba(11, 31, 58, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(11, 31, 58, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* ─── Motion safety ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -53,6 +53,36 @@ Avoid:
 - overdecorated cards
 - fake startup landing page style
 
+## Premium Interaction Design Rules
+
+### Typography
+- Use an Apple-like system font stack: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, sans-serif`.
+- Never bundle Apple fonts or include any Apple proprietary font files.
+- Use large confident headings with tight tracking.
+- Keep body text highly readable at all sizes.
+
+### Liquid Glass Material
+- Use liquid glass-inspired panels carefully — subtle blur, hairline border, soft highlight.
+- Never overuse backdrop-filter blur.
+- Never sacrifice contrast or readability for glass effect.
+- Apply glass only on layered surfaces, hero areas, or command center panels.
+
+### Motion
+- Use Framer Motion for premium entrance animations only where it adds value.
+- Keep animations subtle: fade + slight translate, staggered reveals.
+- Always respect `prefers-reduced-motion` — disable or reduce animations when set.
+- Do not use heavy, bouncy, or distracting animations.
+
+### Overlapping Sections
+- Use overlapping sections intentionally to create depth and visual storytelling.
+- Every overlap must serve a layout purpose — never decorative stacking.
+- Content must remain readable regardless of overlap.
+
+### Contrast & Readability
+- Maintain WCAG AA contrast at all times.
+- Never place light text on light glass without sufficient contrast.
+- Status colors must always be distinguishable.
+
 ## Project Rules
 
 Work step by step.
