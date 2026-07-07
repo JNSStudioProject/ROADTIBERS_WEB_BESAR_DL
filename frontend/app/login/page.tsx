@@ -32,7 +32,7 @@ export default function LoginPage() {
           <InteractiveGlassCard intensity="strong" glow className="p-8 sm:p-10 rounded-[2.5rem] border-white shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#14B8A6]/5 blur-[60px] rounded-full pointer-events-none" />
             
-            <form className="relative z-10 flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="relative z-10 flex flex-col gap-6">
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-[#0B1F3A]/70 uppercase tracking-widest px-1">
