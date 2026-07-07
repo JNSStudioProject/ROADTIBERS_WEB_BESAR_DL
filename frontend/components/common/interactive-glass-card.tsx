@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -23,38 +23,36 @@ export function InteractiveGlassCard({
   const [isHovered, setIsHovered] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    if (shouldReduceMotion) return;
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (shouldReduceMotion || !cardRef.current) return;
+    
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // subtle tilt calculation (max ~6 degrees)
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!cardRef.current || !isHovered) return;
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      // subtle tilt calculation (max ~6 degrees)
-      const rotateX = ((y - centerY) / centerY) * -6;
-      const rotateY = ((x - centerX) / centerX) * 6;
+    const posX = (x / rect.width) * 100;
+    const posY = (y / rect.height) * 100;
 
-      const posX = (x / rect.width) * 100;
-      const posY = (y / rect.height) * 100;
+    setRotation({ x: rotateX, y: rotateY });
+    setMousePos({ x: posX, y: posY });
+  }, [shouldReduceMotion]);
 
-      requestAnimationFrame(() => {
-        setRotation({ x: rotateX, y: rotateY });
-        setMousePos({ x: posX, y: posY });
-      });
-    };
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
 
-    if (isHovered) {
-      window.addEventListener("mousemove", handleMouseMove);
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [isHovered, shouldReduceMotion]);
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    // Reset to default
+    setRotation({ x: 0, y: 0 });
+    setMousePos({ x: 50, y: 50 });
+  }, []);
 
   const baseIntensityClass =
     intensity === "dark"
@@ -68,14 +66,9 @@ export function InteractiveGlassCard({
   return (
     <div
       ref={cardRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        requestAnimationFrame(() => {
-          setRotation({ x: 0, y: 0 });
-          setMousePos({ x: 50, y: 50 });
-        });
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
       className={cn(
         "relative rounded-3xl transition-transform duration-300 ease-out overflow-hidden",
         baseIntensityClass,
