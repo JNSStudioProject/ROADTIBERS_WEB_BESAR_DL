@@ -9,14 +9,14 @@ export function PublicNavbar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 pointer-events-none">
+      <header className="pointer-events-auto flex items-center justify-between h-14 w-full max-w-5xl px-5 sm:px-6 rounded-full bg-white/70 backdrop-blur-md border border-white/50 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)] transition-all">
         {/* Brand */}
         <Link
           href="/"
           className="flex items-center gap-2 shrink-0"
         >
-          <span className="text-sm font-bold tracking-tight text-[#0B1F3A]">
+          <span className="text-[13px] font-bold tracking-tight text-[#0B1F3A]">
             RoadTierbers
           </span>
         </Link>
@@ -28,10 +28,10 @@ export function PublicNavbar() {
               key={route.path}
               href={route.path}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                "px-4 py-1.5 rounded-full text-[13px] font-medium tracking-tight transition-colors",
                 pathname === route.path
-                  ? "text-[#0B1F3A] bg-slate-100"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  ? "text-white bg-[#0B1F3A]"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50"
               )}
             >
               {route.label}
@@ -42,11 +42,11 @@ export function PublicNavbar() {
         {/* CTA */}
         <Link
           href="/login"
-          className="hidden sm:inline-flex items-center h-8 px-4 rounded-lg text-sm font-semibold bg-[#0B1F3A] text-white hover:bg-[#142d52] transition-colors"
+          className="hidden sm:inline-flex items-center justify-center h-8 px-4 rounded-full text-[13px] font-semibold bg-[#1D4ED8] text-white hover:bg-[#1e40af] transition-colors shadow-sm"
         >
           Command Center
         </Link>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
