@@ -10,3 +10,5 @@ export { GlassPanel } from "./glass-panel";
 export { FeatureCard } from "./feature-card";
 export { MotionSection } from "./motion-section";
 export { MouseSpotlight } from "./mouse-spotlight";
+export { InteractiveGlassCard } from "./interactive-glass-card";
+export { ScrollRevealRow } from "./scroll-reveal-row";
