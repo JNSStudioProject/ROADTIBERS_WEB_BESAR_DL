@@ -181,3 +181,11 @@ Before finishing any implementation task, ensure:
 - `npm run build` passes
 - no unrelated files are changed
 - UI is aligned with `docs/PRD.md`
+## Locked Visual Design
+
+- **Design Status**: The current bright liquid glass landing page design is fully approved and must be preserved.
+- **Future Pages**: All future public and officer pages must match this established bright liquid glass style (see docs/DESIGN_LOCK.md for exact details).
+- **Restrictions**: 
+  - Do not redesign the landing page, the navbar, or the global styling unless explicitly asked.
+  - Do not introduce dark-heavy sections, solid black backgrounds, or inconsistent colors (no neon/cyberpunk).
+  - All interactions must remain subtle, professional, and reset cleanly on mouse leave.
