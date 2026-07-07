@@ -1,18 +1,29 @@
 import { OfficerPageShell } from "@/components/layout/officer-page-shell";
-import { PageHeader, EmptyState } from "@/components/common";
+import {
+  ReportHeaderBar,
+  ReportStatusSummary,
+  ReportKpiGrid,
+  ReportControlPanel,
+  ReportPreviewPanel,
+  ReportDetailTable,
+  ValidationChecklistPanel,
+  ReportDisclaimerPanel,
+  ReportQuickNavigation
+} from "@/components/officer/report/report-components";
 
-export default function ReportPage() {
+export default function OfficerReportPage() {
   return (
     <OfficerPageShell>
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <PageHeader
-          title="Report & Export"
-          description="Laporan rekapitulasi data pelanggaran dan pemantauan."
-        />
-        <EmptyState
-          title="Laporan & Ekspor"
-          description="Modul pembuatan dan ekspor laporan sedang dipersiapkan."
-        />
+      <div className="max-w-7xl mx-auto space-y-10 pb-12">
+        <ReportHeaderBar />
+        <ReportStatusSummary />
+        <ReportKpiGrid />
+        <ReportControlPanel />
+        <ReportPreviewPanel />
+        <ReportDetailTable />
+        <ValidationChecklistPanel />
+        <ReportDisclaimerPanel />
+        <ReportQuickNavigation />
       </div>
     </OfficerPageShell>
   );

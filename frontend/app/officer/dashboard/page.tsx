@@ -161,7 +161,7 @@ export default function OfficerDashboardPage() {
                   <ViolationDistributionChart />
                   <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
                     <p className="text-sm font-normal text-slate-700 leading-relaxed">
-                      Pelanggaran "Tanpa Helm" masih mendominasi secara signifikan. Prioritaskan teguran atau edukasi di area rawan.
+                      Pelanggaran &quot;Tanpa Helm&quot; masih mendominasi secara signifikan. Prioritaskan teguran atau edukasi di area rawan.
                     </p>
                   </div>
                 </div>
