@@ -9,48 +9,54 @@ import {
   MouseSpotlight,
   MotionSection,
 } from "@/components/common";
+import { MapPin, Clock, CloudRain, Navigation } from "lucide-react";
 
 export default function DepartureRecommendationPage() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-        const response = await fetch(`${apiUrl}/forecasting/current?origin=Simpang SKA&destination=Bandara SSK II`);
-        
-        if (!response.ok) {
-          throw new Error("Gagal mengambil data");
-        }
-        
-        const res = await response.json();
-        if (res.status === "success" && res.data && res.data.congestion) {
-          setData(res.data);
-        } else {
-          throw new Error("Data tidak valid");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Gagal memuat rekomendasi saat ini.");
-      } finally {
-        setIsLoading(false);
+  // Form states
+  const [origin, setOrigin] = useState("Simpang SKA");
+  const [destination, setDestination] = useState("Bandara SSK II");
+  const [timeMode, setTimeMode] = useState("berangkat");
+  const [targetTime, setTargetTime] = useState("08:00");
+  const [weather, setWeather] = useState("Cerah");
+
+  const fetchPlan = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const response = await fetch(`${apiUrl}/forecasting/plan?origin=${origin}&destination=${destination}&time_mode=${timeMode}&target_time=${targetTime}&weather=${weather}`);
+      
+      if (!response.ok) {
+        throw new Error("Gagal mengambil data");
       }
-    };
-    
-    fetchData();
+      
+      const res = await response.json();
+      if (res.status === "success" && res.data) {
+        setData(res.data);
+      } else {
+        throw new Error(res.message || "Data tidak valid");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Gagal memuat rekomendasi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlan();
   }, []);
 
-  const congestion = data?.congestion;
-  
-  const getStatusInfo = (congestion: any, targetHour: string) => {
-    const cat = congestion?.category?.toLowerCase() || "";
-    const delay = congestion?.delay_minutes || 0;
-    const vol = congestion?.volume_pred || 0;
-    const hour = targetHour || "--:--";
-    const risk = congestion?.risk_level || "Sedang";
-    const weather = congestion?.weather || "Cerah";
+  const getStatusInfo = (data: any) => {
+    const cat = data?.congestion_category?.toLowerCase() || "";
+    const delay = data?.delay_minutes || 0;
+    const hour = data?.target_arrival || data?.departure_time || targetTime;
+    const risk = data?.risk_level || "Sedang";
 
     if (cat.includes("macet total") || cat.includes("macet")) {
       return {
@@ -59,7 +65,7 @@ export default function DepartureRecommendationPage() {
         borderColor: "border-red-100",
         statusText: "Macet",
         rekomendasiUtama: "Tunda Perjalanan",
-        alasanSingkat: `Antrean kendaraan sangat panjang (volume diprediksi mencapai ${vol} kendaraan). Perjalanan Anda berpotensi tertunda hingga ${delay} menit.`,
+        alasanSingkat: `Antrean kendaraan terpantau panjang. Perjalanan Anda berpotensi tertunda hingga ${delay} menit.`,
         polaWaktu: [
           { time: "Sekarang", label: "Macet", color: "bg-red-600", ring: "ring-red-600/20" },
           { time: "+15 menit", label: "Padat", color: "bg-red-500", ring: "ring-red-500/20" },
@@ -67,7 +73,7 @@ export default function DepartureRecommendationPage() {
           { time: "+45 menit", label: "Lancar", color: "bg-[#14B8A6]", ring: "ring-teal-500/20" },
         ],
         decisions: [
-          { title: "Berangkat sekarang", status: "TIDAK DISARANKAN", helper: `Volume ${vol} kendaraan menyebabkan delay ${delay} menit. Hindari berangkat sekarang.`, delay: 0.1, statusColor: "text-red-500", bgStatus: "bg-red-50", borderColor: "border-red-100" },
+          { title: "Berangkat sekarang", status: "TIDAK DISARANKAN", helper: `Menyebabkan delay ${delay} menit. Hindari berangkat sekarang.`, delay: 0.1, statusColor: "text-red-500", bgStatus: "bg-red-50", borderColor: "border-red-100" },
           { title: "Waktu Tunggu", status: "TUNDA 30-45 MNT", helper: `Tunggu hingga kemacetan terurai melewati jam puncak (pukul ${hour}).`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
           { title: "Analisis Risiko", status: `RISIKO ${risk.toUpperCase()}`, helper: `Kondisi jalan macet dengan cuaca ${weather} meningkatkan risiko perjalanan.`, delay: 0.2, statusColor: "text-amber-600", bgStatus: "bg-amber-50", borderColor: "border-amber-100" }
         ]
@@ -79,7 +85,7 @@ export default function DepartureRecommendationPage() {
         borderColor: "border-amber-100",
         statusText: "Mulai Padat",
         rekomendasiUtama: "Cari Rute Alternatif",
-        alasanSingkat: `Arus lalu lintas mulai melambat dengan prediksi volume ${vol} kendaraan. Terdapat potensi delay perjalanan sekitar ${delay} menit.`,
+        alasanSingkat: `Arus lalu lintas mulai melambat. Terdapat potensi delay perjalanan sekitar ${delay} menit.`,
         polaWaktu: [
           { time: "Sekarang", label: "Agak Padat", color: "bg-amber-500", ring: "ring-amber-500/20" },
           { time: "+15 menit", label: "Menurun", color: "bg-amber-400", ring: "ring-amber-400/20" },
@@ -88,7 +94,7 @@ export default function DepartureRecommendationPage() {
         ],
         decisions: [
           { title: "Berangkat sekarang", status: "BISA DILAKUKAN", helper: `Lalu lintas melambat (estimasi delay ${delay} menit), namun masih bisa dilewati.`, delay: 0.1, statusColor: "text-amber-500", bgStatus: "bg-amber-50", borderColor: "border-amber-100" },
-          { title: "Rekomendasi Rute", status: "CARI ALTERNATIF", helper: `Volume ${vol} kendaraan terpantau di jalur utama. Gunakan rute alternatif jika memungkinkan.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
+          { title: "Rekomendasi Rute", status: "CARI ALTERNATIF", helper: `Gunakan rute alternatif jika memungkinkan untuk menghindari kepadatan.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
           { title: "Analisis Risiko", status: `RISIKO ${risk.toUpperCase()}`, helper: `Kecepatan kendaraan perlu diturunkan. Cuaca ${weather} saat ini.`, delay: 0.2, statusColor: "text-[#14B8A6]", bgStatus: "bg-teal-50", borderColor: "border-teal-100" }
         ]
       };
@@ -99,7 +105,7 @@ export default function DepartureRecommendationPage() {
         borderColor: "border-red-100",
         statusText: "Padat",
         rekomendasiUtama: "Tunda 20–30 menit",
-        alasanSingkat: `Kepadatan cukup tinggi (sekitar ${vol} kendaraan). Perjalanan Anda akan tertunda kira-kira ${delay} menit.`,
+        alasanSingkat: `Kepadatan cukup tinggi. Perjalanan Anda akan tertunda kira-kira ${delay} menit.`,
         polaWaktu: [
           { time: "Sekarang", label: "Padat", color: "bg-red-500", ring: "ring-red-500/20" },
           { time: "+15 menit", label: "Masih padat", color: "bg-red-400", ring: "ring-red-400/20" },
@@ -108,7 +114,7 @@ export default function DepartureRecommendationPage() {
         ],
         decisions: [
           { title: "Berangkat sekarang", status: "TIDAK DISARANKAN", helper: `Tundaan hingga ${delay} menit. Perjalanan akan memakan waktu lebih lambat dari biasanya.`, delay: 0.1, statusColor: "text-red-500", bgStatus: "bg-red-50", borderColor: "border-red-100" },
-          { title: "Waktu Tunggu", status: "TUNDA 20-30 MNT", helper: `Volume kendaraan saat ini mencapai angka ${vol}. Tunggu antrean sedikit mereda.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
+          { title: "Waktu Tunggu", status: "TUNDA 20-30 MNT", helper: `Tunggu antrean sedikit mereda sebelum berangkat.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
           { title: "Analisis Risiko", status: `RISIKO ${risk.toUpperCase()}`, helper: `Patuhi jarak aman kendaraan di jam ${hour} ini dengan cuaca ${weather}.`, delay: 0.2, statusColor: "text-amber-600", bgStatus: "bg-amber-50", borderColor: "border-amber-100" }
         ]
       };
@@ -120,7 +126,7 @@ export default function DepartureRecommendationPage() {
       borderColor: "border-teal-100",
       statusText: "Lancar",
       rekomendasiUtama: "Jalan Terus",
-      alasanSingkat: `Kondisi sangat ideal. Volume terpantau ${vol} kendaraan tanpa ada prediksi antrean yang berarti.`,
+      alasanSingkat: `Kondisi sangat ideal. Tidak ada antrean yang berarti.`,
       polaWaktu: [
         { time: "Sekarang", label: "Lancar", color: "bg-[#14B8A6]", ring: "ring-teal-500/20" },
         { time: "+15 menit", label: "Tetap stabil", color: "bg-[#14B8A6]", ring: "ring-teal-500/20" },
@@ -129,14 +135,16 @@ export default function DepartureRecommendationPage() {
       ],
       decisions: [
         { title: "Berangkat sekarang", status: "SANGAT DISARANKAN", helper: `Estimasi delay hanya ${delay} menit pada pukul ${hour}. Waktu ideal untuk perjalanan.`, delay: 0.1, statusColor: "text-[#14B8A6]", bgStatus: "bg-teal-50", borderColor: "border-teal-100" },
-        { title: "Prediksi Volume", status: "TERKENDALI", helper: `Hanya ada sekitar ${vol} kendaraan di rute. Arus lalu lintas mengalir lancar.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
+        { title: "Prediksi Volume", status: "TERKENDALI", helper: `Arus lalu lintas mengalir lancar.`, delay: 0.15, statusColor: "text-[#1D4ED8]", bgStatus: "bg-blue-50", borderColor: "border-blue-100" },
         { title: "Analisis Risiko", status: `RISIKO ${risk.toUpperCase()}`, helper: `Cuaca ${weather} dan jalan lengang. Tetap kendalikan batas kecepatan Anda.`, delay: 0.2, statusColor: "text-[#0B1F3A]", bgStatus: "bg-slate-100", borderColor: "border-slate-200" }
       ]
     };
   };
 
-  const statusInfo = getStatusInfo(congestion, data?.target_hour);
-  const delayMinutes = congestion?.delay_minutes ?? 0;
+  const statusInfo = getStatusInfo(data);
+  const delayMinutes = data?.delay_minutes ?? 0;
+  const totalTravelTime = data?.total_travel_time ?? 0;
+  const recommendedTime = data?.recommended_departure || data?.estimated_arrival || "--:--";
 
   return (
     <PublicPageShell>
@@ -147,7 +155,7 @@ export default function DepartureRecommendationPage() {
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#06B6D4]/5 blur-[120px] rounded-full pointer-events-none" />
 
         {/* 1. Page Hero */}
-        <section className="relative pt-32 pb-12 lg:pt-36 lg:pb-16 flex flex-col items-center justify-center z-10">
+        <section className="relative pt-32 pb-6 lg:pt-36 lg:pb-8 flex flex-col items-center justify-center z-10">
           <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center gap-6">
             <MotionSection direction="up" delay={0.1}>
               <span className="inline-flex items-center gap-2.5 rounded-full border border-white/80 bg-white/60 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0B1F3A] backdrop-blur-md shadow-sm">
@@ -163,30 +171,131 @@ export default function DepartureRecommendationPage() {
                 Gunakan estimasi kemacetan AI untuk menentukan waktu perjalanan yang lebih nyaman dan aman.
               </p>
             </MotionSection>
-            
-            <MotionSection direction="up" delay={0.2}>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-white/80 shadow-sm backdrop-blur-md mt-4">
-                <span className="w-2 h-2 rounded-full bg-[#1D4ED8] animate-pulse shadow-[0_0_8px_#1D4ED8]" />
-                <span className="text-xs font-bold text-[#0B1F3A]/70">Berdasarkan hasil forecasting AI</span>
-              </div>
-            </MotionSection>
+          </div>
+        </section>
+
+        {/* 1.5. Trip Planner Form */}
+        <section className="relative z-20 pb-8">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+             <InteractiveGlassCard intensity="strong" glow className="w-full p-6 md:p-8 bg-white/80 backdrop-blur-xl border border-white/80 shadow-md rounded-[2rem]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lokasi Asal</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select 
+                            value={origin} 
+                            onChange={e => setOrigin(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-sm font-medium"
+                          >
+                             <option value="Simpang SKA">Simpang SKA</option>
+                             <option value="Pasar Pagi">Pasar Pagi</option>
+                             <option value="Bandara SSK II">Bandara SSK II</option>
+                             <option value="Panam">Panam</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tujuan</label>
+                        <div className="relative">
+                          <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select 
+                            value={destination} 
+                            onChange={e => setDestination(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-sm font-medium"
+                          >
+                             <option value="Bandara SSK II">Bandara SSK II</option>
+                             <option value="Simpang SKA">Simpang SKA</option>
+                             <option value="Pasar Pagi">Pasar Pagi</option>
+                             <option value="Panam">Panam</option>
+                          </select>
+                        </div>
+                      </div>
+                   </div>
+                   
+                   <div className="space-y-4">
+                      <div>
+                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mode Waktu</label>
+                         <div className="flex bg-slate-100 p-1 rounded-xl">
+                            <button 
+                              onClick={() => setTimeMode("berangkat")}
+                              className={\`flex-1 text-xs font-bold py-2 rounded-lg transition-colors \${timeMode === "berangkat" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}\`}
+                            >
+                               Berangkat Pukul
+                            </button>
+                            <button 
+                              onClick={() => setTimeMode("tiba")}
+                              className={\`flex-1 text-xs font-bold py-2 rounded-lg transition-colors \${timeMode === "tiba" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}\`}
+                            >
+                               Harus Tiba Pukul
+                            </button>
+                         </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jam</label>
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input 
+                              type="time" 
+                              value={targetTime}
+                              onChange={e => setTargetTime(e.target.value)}
+                              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm font-medium"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cuaca</label>
+                          <div className="relative">
+                            <CloudRain className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <select 
+                              value={weather}
+                              onChange={e => setWeather(e.target.value)}
+                              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-sm font-medium"
+                            >
+                               <option value="Cerah">Cerah</option>
+                               <option value="Hujan">Hujan Ringan</option>
+                               <option value="Hujan Lebat">Hujan Lebat</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                   </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end">
+                  <button 
+                    onClick={fetchPlan}
+                    disabled={isLoading}
+                    className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isLoading ? (
+                      <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Kalkulasi...</>
+                    ) : (
+                      "Rencanakan Perjalanan"
+                    )}
+                  </button>
+                </div>
+             </InteractiveGlassCard>
           </div>
         </section>
 
         {isLoading ? (
-          <section className="relative z-20 pb-16 min-h-[40vh] flex items-center justify-center">
+          <section className="relative z-20 pb-16 min-h-[20vh] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
               <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-slate-500 font-medium animate-pulse">Menyiapkan rekomendasi...</p>
+              <p className="text-slate-500 font-medium animate-pulse">Menyiapkan rekomendasi rute...</p>
             </div>
           </section>
         ) : error ? (
-          <section className="relative z-20 pb-16 min-h-[40vh] flex items-center justify-center">
+          <section className="relative z-20 pb-16 min-h-[20vh] flex items-center justify-center">
             <div className="p-6 rounded-2xl bg-red-50 border border-red-200 text-center">
               <p className="text-red-500 font-medium">{error}</p>
             </div>
           </section>
-        ) : (
+        ) : data ? (
           <>
             {/* 2. Main Recommendation Panel */}
             <section className="relative z-20 pb-16">
@@ -214,14 +323,24 @@ export default function DepartureRecommendationPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-4 relative z-10 w-full md:w-auto min-w-[240px]">
+                    <div className="flex flex-col gap-4 relative z-10 w-full md:w-auto min-w-[280px]">
+                      <div className="p-5 rounded-2xl bg-blue-600 text-white shadow-lg flex justify-between items-center">
+                        <p className="text-xs font-bold text-blue-200 uppercase tracking-widest">
+                          {timeMode === "tiba" ? "Jam Keberangkatan" : "Estimasi Tiba"}
+                        </p>
+                        <span className="text-2xl font-extrabold">{recommendedTime}</span>
+                      </div>
                       <div className="p-5 rounded-2xl bg-white/80 border border-white/80 shadow-sm backdrop-blur-md flex justify-between items-center">
-                        <p className="text-xs font-bold text-[#0B1F3A]/60 uppercase tracking-widest">Status Perjalanan</p>
-                        <span className={`text-sm font-bold px-3 py-1 rounded-full border ${statusInfo.color} ${statusInfo.bgStatus} ${statusInfo.borderColor}`}>{statusInfo.statusText}</span>
+                        <p className="text-xs font-bold text-[#0B1F3A]/60 uppercase tracking-widest">Total Waktu Tempuh</p>
+                        <span className="text-sm font-extrabold text-[#0B1F3A]">{totalTravelTime} menit</span>
                       </div>
                       <div className="p-5 rounded-2xl bg-white/80 border border-white/80 shadow-sm backdrop-blur-md flex justify-between items-center">
                         <p className="text-xs font-bold text-[#0B1F3A]/60 uppercase tracking-widest">Estimasi Kemacetan</p>
                         <span className="text-sm font-extrabold text-[#0B1F3A]">{delayMinutes} menit</span>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-white/80 border border-white/80 shadow-sm backdrop-blur-md flex justify-between items-center">
+                        <p className="text-xs font-bold text-[#0B1F3A]/60 uppercase tracking-widest">Status Perjalanan</p>
+                        <span className={\`text-sm font-bold px-3 py-1 rounded-full border \${statusInfo.color} \${statusInfo.bgStatus} \${statusInfo.borderColor}\`}>{statusInfo.statusText}</span>
                       </div>
                     </div>
                   </InteractiveGlassCard>
@@ -238,8 +357,8 @@ export default function DepartureRecommendationPage() {
                       <InteractiveGlassCard intensity="medium" className="p-6 h-full border-white shadow-sm flex flex-col">
                         <div className="flex-1">
                           <p className="text-[11px] font-bold text-[#0B1F3A]/50 uppercase tracking-widest mb-3">{item.title}</p>
-                          <div className={`inline-flex items-center px-2.5 py-1 rounded-md border ${item.bgStatus} ${item.borderColor} mb-4`}>
-                            <span className={`text-[11px] font-bold uppercase tracking-widest ${item.statusColor}`}>{item.status}</span>
+                          <div className={\`inline-flex items-center px-2.5 py-1 rounded-md border \${item.bgStatus} \${item.borderColor} mb-4\`}>
+                            <span className={\`text-[11px] font-bold uppercase tracking-widest \${item.statusColor}\`}>{item.status}</span>
                           </div>
                         </div>
                         <p className="text-sm font-medium text-slate-500 leading-relaxed mt-2">{item.helper}</p>
@@ -266,7 +385,7 @@ export default function DepartureRecommendationPage() {
                       
                       {statusInfo.polaWaktu.map((node, i) => (
                         <div key={i} className="flex flex-row sm:flex-col items-center gap-4 sm:gap-3 relative z-10 bg-white/70 sm:bg-white/60 p-3 sm:px-4 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-sm border border-white/50 w-full sm:max-w-[140px] shadow-sm sm:shadow-none hover:shadow-md transition-shadow">
-                          <div className={`w-3.5 h-3.5 rounded-full ${node.color} ring-4 ${node.ring} shadow-sm shrink-0`} />
+                          <div className={\`w-3.5 h-3.5 rounded-full \${node.color} ring-4 \${node.ring} shadow-sm shrink-0\`} />
                           <div className="flex flex-col sm:items-center w-full">
                             <span className="text-xs font-bold text-[#0B1F3A]/60 sm:mb-1">{node.time}</span>
                             <span className="text-sm sm:text-[11px] font-bold text-[#0B1F3A] sm:uppercase sm:tracking-widest">{node.label}</span>
@@ -279,7 +398,7 @@ export default function DepartureRecommendationPage() {
               </div>
             </section>
           </>
-        )}
+        ) : null}
 
         {/* 5. Safety Guidance Section */}
         <section className="relative z-10 pb-20">
@@ -330,4 +449,3 @@ export default function DepartureRecommendationPage() {
     </PublicPageShell>
   );
 }
-

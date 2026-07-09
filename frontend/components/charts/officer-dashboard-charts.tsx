@@ -14,25 +14,11 @@ import {
   Legend
 } from "recharts";
 
-const volumeData = [
-  { time: "08:00", "Volume Kendaraan": 690 },
-  { time: "09:00", "Volume Kendaraan": 760 },
-  { time: "10:00", "Volume Kendaraan": 842 },
-  { time: "11:00", "Volume Kendaraan": 880 },
-  { time: "12:00", "Volume Kendaraan": 920 },
-];
-
-const violationData = [
-  { name: "Tanpa Helm", count: 24, color: "#f59e0b" },
-  { name: "Bonceng >2", count: 8, color: "#14b8a6" },
-  { name: "Plat/Pajak", count: 5, color: "#1d4ed8" },
-];
-
-export function TrafficVolumeChart() {
+export function TrafficVolumeChart({ data }: { data: any[] }) {
   return (
     <div className="w-full h-72 mt-2">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={volumeData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+        <LineChart data={data || []} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
           <XAxis 
             dataKey="time" 
@@ -72,11 +58,11 @@ export function TrafficVolumeChart() {
   );
 }
 
-export function ViolationDistributionChart() {
+export function ViolationDistributionChart({ data }: { data: any[] }) {
   return (
     <div className="w-full h-72 mt-2">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={violationData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+        <BarChart data={data || []} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
           <XAxis 
             type="number"
@@ -100,7 +86,7 @@ export function ViolationDistributionChart() {
             formatter={(value) => [`${value} Kasus`, "Jumlah"]}
           />
           <Bar dataKey="count" name="Jumlah Kasus" radius={[0, 6, 6, 0]} isAnimationActive={false} barSize={32}>
-            {violationData.map((entry, index) => (
+            {(data || []).map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Bar>
