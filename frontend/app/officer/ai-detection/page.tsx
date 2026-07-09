@@ -33,13 +33,28 @@ interface AnalyzeResponse {
   };
 }
 
+// Global state to persist data during client-side navigation
+let globalAIDetectionState = {
+  selectedFile: null as File | null,
+  previewUrl: null as string | null,
+  imgSize: { width: 0, height: 0 },
+  results: null as AnalyzeResponse | null,
+};
+
 export default function OfficerAIDetectionPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imgSize, setImgSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const [selectedFile, setSelectedFile] = useState<File | null>(globalAIDetectionState.selectedFile);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(globalAIDetectionState.previewUrl);
+  const [imgSize, setImgSize] = useState<{ width: number; height: number }>(globalAIDetectionState.imgSize);
   const [isDetecting, setIsDetecting] = useState(false);
-  const [results, setResults] = useState<AnalyzeResponse | null>(null);
+  const [results, setResults] = useState<AnalyzeResponse | null>(globalAIDetectionState.results);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    globalAIDetectionState.selectedFile = selectedFile;
+    globalAIDetectionState.previewUrl = previewUrl;
+    globalAIDetectionState.imgSize = imgSize;
+    globalAIDetectionState.results = results;
+  }, [selectedFile, previewUrl, imgSize, results]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

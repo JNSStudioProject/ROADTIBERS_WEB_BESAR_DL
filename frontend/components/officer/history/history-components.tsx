@@ -1,13 +1,29 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/common";
 import { 
-  historyKpis, 
-  historyRows, 
   validationQueue, 
   riskTimeline, 
   recommendedActions, 
   quickLinks 
 } from "@/data/officer-history";
+
+// New prop types
+interface HistoryRow {
+  time: string;
+  loc: string;
+  cat: string;
+  res: string;
+  count: string;
+  risk: string;
+  val: string;
+  note: string;
+  follow: string;
+}
+
+interface HistoryData {
+  historyRows: HistoryRow[];
+  total_records: number;
+}
 
 export function HistoryHeaderBar() {
   return (
@@ -33,7 +49,7 @@ export function HistoryHeaderBar() {
   );
 }
 
-export function HistoryStatusSummary() {
+export function HistoryStatusSummary({ total, validationNeeded, highRisk }: { total: number, validationNeeded: number, highRisk: number }) {
   return (
     <section>
       <div className="p-6 sm:p-8 rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-sm flex flex-col relative overflow-hidden">
@@ -42,7 +58,7 @@ export function HistoryStatusSummary() {
           <div className="flex flex-col space-y-2 md:pr-6">
             <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Total Riwayat</p>
             <div className="flex items-center pt-1 pb-2">
-              <span className="text-2xl font-medium text-[#0B1F3A]">128 data</span>
+              <span className="text-2xl font-medium text-[#0B1F3A]">{total} data</span>
             </div>
             <p className="text-sm font-normal text-slate-600 leading-relaxed">
               Jumlah data deteksi yang tercatat pada sample hari ini.
@@ -51,7 +67,7 @@ export function HistoryStatusSummary() {
           <div className="flex flex-col space-y-2 pt-6 md:pt-0 md:px-6">
             <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Perlu Validasi</p>
             <div className="flex items-center pt-1 pb-2">
-              <span className="text-2xl font-medium text-amber-600">34 data</span>
+              <span className="text-2xl font-medium text-amber-600">{validationNeeded} data</span>
             </div>
             <p className="text-sm font-normal text-slate-600 leading-relaxed">
               Data yang masih perlu diperiksa ulang oleh petugas.
@@ -61,7 +77,7 @@ export function HistoryStatusSummary() {
             <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Risiko Tinggi</p>
             <div className="flex items-center pt-1 pb-2">
               <StatusBadge status="Tinggi" className="px-4 py-1.5 text-sm" />
-              <span className="text-2xl font-medium text-red-600 ml-3">18 data</span>
+              <span className="text-2xl font-medium text-red-600 ml-3">{highRisk} data</span>
             </div>
             <p className="text-sm font-normal text-slate-600 leading-relaxed">
               Data yang perlu diprioritaskan untuk validasi.
@@ -70,7 +86,7 @@ export function HistoryStatusSummary() {
           <div className="flex flex-col space-y-2 pt-6 md:pt-0 md:pl-6">
             <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Sudah Ditinjau</p>
             <div className="flex items-center pt-1 pb-2">
-              <span className="text-2xl font-medium text-teal-600">94 data</span>
+              <span className="text-2xl font-medium text-teal-600">{total - validationNeeded} data</span>
             </div>
             <p className="text-sm font-normal text-slate-600 leading-relaxed">
               Data yang sudah memiliki catatan tinjauan awal.
@@ -82,40 +98,49 @@ export function HistoryStatusSummary() {
   );
 }
 
-export function FilterSummaryBar() {
+export function FilterSummaryBar({ activeFilter, setActiveFilter }: { activeFilter?: string, setActiveFilter?: (f: string) => void }) {
+  const filters = ["Semua data", "Risiko tinggi", "Perlu validasi", "Pelanggaran", "Plat", "Forecasting"];
   return (
     <section>
       <div className="p-4 rounded-xl bg-slate-50/50 border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-2">
-          <span className="px-4 py-1.5 rounded-full bg-[#0B1F3A] text-white text-xs font-medium border border-[#0B1F3A]">Semua data</span>
-          <span className="px-4 py-1.5 rounded-full bg-white text-slate-600 text-xs font-medium border border-slate-200 cursor-not-allowed opacity-70">Risiko tinggi</span>
-          <span className="px-4 py-1.5 rounded-full bg-white text-slate-600 text-xs font-medium border border-slate-200 cursor-not-allowed opacity-70">Perlu validasi</span>
-          <span className="px-4 py-1.5 rounded-full bg-white text-slate-600 text-xs font-medium border border-slate-200 cursor-not-allowed opacity-70">Pelanggaran</span>
-          <span className="px-4 py-1.5 rounded-full bg-white text-slate-600 text-xs font-medium border border-slate-200 cursor-not-allowed opacity-70">Plat tersamarkan</span>
-          <span className="px-4 py-1.5 rounded-full bg-white text-slate-600 text-xs font-medium border border-slate-200 cursor-not-allowed opacity-70">Forecasting</span>
+          {filters.map(f => (
+            <button
+              key={f}
+              onClick={() => setActiveFilter && setActiveFilter(f)}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium border ${
+                activeFilter === f 
+                  ? "bg-[#0B1F3A] text-white border-[#0B1F3A]" 
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
         <div className="flex gap-4 text-xs font-medium text-slate-500 shrink-0 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-4 w-full md:w-auto">
           <span>Rentang waktu: <span className="text-slate-700">Hari ini</span></span>
-          <span>Area: <span className="text-slate-700">Semua area sample</span></span>
+          <span>Area: <span className="text-slate-700">Simpang SKA (All)</span></span>
         </div>
       </div>
     </section>
   );
 }
 
-export function HistoryKpiGrid() {
+export function HistoryKpiGrid({ data }: { data: HistoryData }) {
+  const kpis = [
+    { label: "Total Data Deteksi", value: data.total_records, color: "text-[#1D4ED8]" },
+    { label: "Anomali Pelanggaran", value: data.historyRows.filter(r => r.risk === "Tinggi").length, color: "text-amber-600" },
+    { label: "Menunggu Validasi", value: data.historyRows.filter(r => r.val.toLowerCase() === "perlu validasi").length, color: "text-red-600" },
+  ];
   return (
     <section>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {historyKpis.map((kpi, i) => (
+        {kpis.map((kpi, i) => (
           <div key={i} className="p-6 rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-sm flex flex-col justify-between">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">{kpi.label}</p>
             <div className="mb-4">
               <span className={`text-3xl font-medium ${kpi.color} tracking-tight`}>{kpi.value}</span>
-              {kpi.unit && <span className="text-base font-medium text-slate-500 ml-2">{kpi.unit}</span>}
-            </div>
-            <div className="mt-auto pt-4 border-t border-slate-100">
-              <p className="text-sm font-normal text-slate-500">{kpi.helper}</p>
             </div>
           </div>
         ))}
@@ -124,11 +149,11 @@ export function HistoryKpiGrid() {
   );
 }
 
-export function MainHistoryTable() {
+export function MainHistoryTable({ rows }: { rows: HistoryRow[] }) {
   return (
     <section>
       <div className="p-6 sm:p-8 rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-sm overflow-hidden flex flex-col">
-        <h2 className="text-lg font-medium text-[#0B1F3A] mb-6">Log Riwayat Deteksi (Data Simulasi)</h2>
+        <h2 className="text-lg font-medium text-[#0B1F3A] mb-6">Log Riwayat Deteksi Asli</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
@@ -145,7 +170,7 @@ export function MainHistoryTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {historyRows.map((row, i) => (
+              {rows.map((row, i) => (
                 <tr key={i} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-sm font-medium text-slate-500 whitespace-nowrap">{row.time}</td>
                   <td className="p-4 text-sm font-medium text-[#0B1F3A] whitespace-nowrap">{row.loc}</td>
@@ -214,7 +239,30 @@ export function ValidationAndTimeline() {
   );
 }
 
-export function NotesAndActions() {
+export function NotesAndActions({ rows }: { rows: HistoryRow[] }) {
+  // Generate dynamic recommendations based on history data
+  const dynamicActions = [];
+  
+  if (rows.some(r => r.cat === 'Pelanggaran' && r.risk === 'Tinggi')) {
+    dynamicActions.push({ title: "Prioritas Pelanggaran Tinggi", desc: "Ada pelanggaran kasatmata (seperti tanpa helm / boncengan 3) yang harus divalidasi.", link: "/officer/violation-monitoring" });
+  }
+  if (rows.some(r => r.cat === 'Plat')) {
+    dynamicActions.push({ title: "Tinjau Kualitas Plat", desc: "Terdeteksi plat buram atau masalah pembacaan administrasi.", link: "/officer/vehicle-plate" });
+  }
+  if (rows.some(r => r.cat === 'Forecasting')) {
+    dynamicActions.push({ title: "Tinjau Estimasi Kemacetan", desc: "Periksa hasil forecasting berdasarkan deteksi volume kendaraan.", link: "/officer/forecasting" });
+  }
+  if (rows.some(r => r.cat === 'Kendaraan' || r.cat === 'Rambu')) {
+    dynamicActions.push({ title: "Verifikasi Visual AI", desc: "Cocokkan dengan tangkapan kamera langsung.", link: "/officer/ai-detection" });
+  }
+  
+  // Jika masih ada slot kosong (maksimal 4)
+  if (dynamicActions.length < 4) {
+    dynamicActions.push({ title: "Susun Laporan Harian", desc: "Rekap data tervalidasi ke dalam dokumen laporan.", link: "/officer/report" });
+  }
+
+  const actionsToShow = dynamicActions.slice(0, 4);
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="p-6 sm:p-8 rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-sm flex flex-col">
@@ -250,7 +298,7 @@ export function NotesAndActions() {
       <div className="p-6 sm:p-8 rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-sm flex flex-col">
         <h2 className="text-base font-medium text-[#0B1F3A] mb-5">Rekomendasi Tindakan Petugas</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {recommendedActions.map((action, i) => (
+          {actionsToShow.map((action, i) => (
             <div key={i} className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-full">
               <div>
                 <p className="text-sm font-medium text-[#0B1F3A] mb-1">{action.title}</p>

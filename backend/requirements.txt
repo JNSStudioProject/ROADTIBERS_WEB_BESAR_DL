@@ -49,3 +49,6 @@ ultralytics-thop==2.0.20
 urllib3==2.7.0
 uvicorn==0.50.2
 onnxruntime
+tensorflow==2.15.0
+scikit-learn==1.3.2
+joblib==1.3.2

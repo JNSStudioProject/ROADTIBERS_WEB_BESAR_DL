@@ -14,17 +14,20 @@ import pytz
 
 try:
     from models.forecasting_kel9 import predict_congestion
-except ImportError:
+except Exception as e:
+    print(f"Error importing forecasting_kel9: {e}")
     predict_congestion = None
 
 try:
     from models.forecasting_kel8 import predict_violations
-except ImportError:
+except Exception as e:
+    print(f"Error importing forecasting_kel8: {e}")
     predict_violations = None
 
 try:
     from models.forecasting_kendaraan import predict_kendaraan
-except ImportError:
+except Exception as e:
+    print(f"Error importing forecasting_kendaraan: {e}")
     predict_kendaraan = None
 
 # 1. Initialize DB tables
@@ -264,8 +267,22 @@ async def get_forecast(
                 # Detail per kelas untuk lstm kendaraan
                 if hour not in kendaraan_hourly:
                     kendaraan_hourly[hour] = {'Mobil': 0, 'Bus': 0, 'Truk': 0, 'Motor': 0}
+                
+                # Pemetan label model YOLOv8 (COCO) ke label yang diharapkan forecasting
+                name_mapping = {
+                    'car': 'Mobil',
+                    'bus': 'Bus',
+                    'truck': 'Truk',
+                    'motorcycle': 'Motor',
+                    'Mobil': 'Mobil',
+                    'Bus': 'Bus',
+                    'Truk': 'Truk',
+                    'Motor': 'Motor'
+                }
+                
                 for det in kendaraan_res['data']:
-                    name = det.get('name')
+                    raw_name = det.get('name')
+                    name = name_mapping.get(raw_name, raw_name)
                     if name in kendaraan_hourly[hour]:
                         kendaraan_hourly[hour][name] += 1
 
@@ -339,5 +356,178 @@ async def get_forecast(
             message=str(e),
             data=None
         )
+    finally:
+        db.close()
+
+# 7. Dashboard and History Endpoints
+@app.get("/dashboard/summary", response_model=ApiResponse)
+async def get_dashboard_summary():
+    db = SessionLocal()
+    try:
+        now = datetime.utcnow()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Get today's records
+        records_today = db.query(DetectionHistory).filter(DetectionHistory.timestamp >= today_start).all()
+        
+        total_detections_today = len(records_today)
+        total_violations_today = 0
+        total_vehicles = 0
+        violation_counts = {"Tanpa Helm": 0, "Bonceng >2": 0, "Plat/Pajak": 0}
+        
+        # for volume chart
+        hourly_volume = {}
+        
+        for record in records_today:
+            if not record.results: continue
+            
+            hr_str = record.timestamp.strftime("%H:00")
+            if hr_str not in hourly_volume:
+                hourly_volume[hr_str] = 0
+                
+            kendaraan_res = record.results.get('kendaraan', {})
+            if isinstance(kendaraan_res, dict) and kendaraan_res.get('status') == 'success' and kendaraan_res.get('data'):
+                total_vehicles += len(kendaraan_res['data'])
+                hourly_volume[hr_str] += len(kendaraan_res['data'])
+                
+            helm_res = record.results.get('helm', {})
+            if isinstance(helm_res, dict) and helm_res.get('status') == 'success' and helm_res.get('data'):
+                c = len(helm_res['data'])
+                total_violations_today += c
+                violation_counts["Tanpa Helm"] += c
+                
+            boncengan_res = record.results.get('boncengan', {})
+            if isinstance(boncengan_res, dict) and boncengan_res.get('status') == 'success' and boncengan_res.get('data'):
+                c = len(boncengan_res['data'])
+                total_violations_today += c
+                violation_counts["Bonceng >2"] += c
+                
+            plat_res = record.results.get('plat', {})
+            if isinstance(plat_res, dict) and plat_res.get('status') == 'success' and plat_res.get('data'):
+                c = len(plat_res['data'])
+                total_violations_today += c
+                violation_counts["Plat/Pajak"] += c
+
+            pajak_res = record.results.get('pajak', {})
+            if isinstance(pajak_res, dict) and pajak_res.get('status') == 'success' and pajak_res.get('data'):
+                c = len(pajak_res['data'])
+                total_violations_today += c
+                violation_counts["Plat/Pajak"] += c
+
+        # format volume data for chart
+        volume_data = []
+        for hr in sorted(hourly_volume.keys()):
+            volume_data.append({"time": hr, "Volume Kendaraan": hourly_volume[hr]})
+            
+        # fill gaps if needed, or just return as is
+            
+        # format violation data for chart
+        violation_data = [
+            {"name": "Tanpa Helm", "count": violation_counts["Tanpa Helm"], "color": "#f59e0b"},
+            {"name": "Bonceng >2", "count": violation_counts["Bonceng >2"], "color": "#14b8a6"},
+            {"name": "Plat/Pajak", "count": violation_counts["Plat/Pajak"], "color": "#1d4ed8"},
+        ]
+        
+        dominant_violation = max(violation_counts, key=violation_counts.get) if total_violations_today > 0 else "Tidak Ada"
+        
+        return ApiResponse(
+            status="success",
+            message="Dashboard summary retrieved",
+            data={
+                "total_detections_today": total_detections_today,
+                "total_violations_today": total_violations_today,
+                "total_vehicles": total_vehicles,
+                "dominant_violation": dominant_violation,
+                "volume_data": volume_data,
+                "violation_data": violation_data,
+                "system_status": "Normal",
+                "traffic_condition": "Padat" if total_vehicles > 200 else "Lancar",
+                "violation_risk": "Tinggi" if total_violations_today > 50 else "Sedang"
+            }
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return ApiResponse(status="error", message=str(e), data=None)
+    finally:
+        db.close()
+
+
+@app.get("/history/list", response_model=ApiResponse)
+async def get_history_list(limit: int = 100):
+    db = SessionLocal()
+    try:
+        records = db.query(DetectionHistory).order_by(DetectionHistory.timestamp.desc()).limit(limit).all()
+        history_rows = []
+        
+        for record in records:
+            time_str = record.timestamp.strftime("%H:%M")
+            loc_str = "Simpang SKA"
+            
+            if not record.results: continue
+            
+            v_count = 0
+            if isinstance(record.results.get('kendaraan'), dict) and record.results.get('kendaraan', {}).get('status') == 'success' and record.results.get('kendaraan', {}).get('data'):
+                v_count = len(record.results['kendaraan']['data'])
+                
+            helm_count = 0
+            if isinstance(record.results.get('helm'), dict) and record.results.get('helm', {}).get('status') == 'success' and record.results.get('helm', {}).get('data'):
+                helm_count = len(record.results['helm']['data'])
+                
+            bonceng_count = 0
+            if isinstance(record.results.get('boncengan'), dict) and record.results.get('boncengan', {}).get('status') == 'success' and record.results.get('boncengan', {}).get('data'):
+                bonceng_count = len(record.results['boncengan']['data'])
+                
+            if v_count > 0:
+                history_rows.append({
+                    "time": time_str,
+                    "loc": loc_str,
+                    "cat": "Volume Kendaraan",
+                    "res": "Terdeteksi",
+                    "count": f"{v_count} Kendaraan",
+                    "risk": "Normal" if v_count < 10 else "Sedang",
+                    "val": "Tinjauan Awal",
+                    "note": f"Dari {record.filename}",
+                    "follow": "Lihat Detail"
+                })
+                
+            if helm_count > 0:
+                history_rows.append({
+                    "time": time_str,
+                    "loc": loc_str,
+                    "cat": "Pelanggaran Helm",
+                    "res": "Tanpa Helm",
+                    "count": f"{helm_count} Kasus",
+                    "risk": "Tinggi",
+                    "val": "Perlu Validasi",
+                    "note": f"Dari {record.filename}",
+                    "follow": "Validasi Visual"
+                })
+                
+            if bonceng_count > 0:
+                history_rows.append({
+                    "time": time_str,
+                    "loc": loc_str,
+                    "cat": "Pelanggaran Penumpang",
+                    "res": "Bonceng >2",
+                    "count": f"{bonceng_count} Kasus",
+                    "risk": "Tinggi",
+                    "val": "Perlu Validasi",
+                    "note": f"Dari {record.filename}",
+                    "follow": "Validasi Visual"
+                })
+                
+        return ApiResponse(
+            status="success",
+            message="History list retrieved",
+            data={
+                "historyRows": history_rows[:limit],
+                "total_records": len(history_rows)
+            }
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return ApiResponse(status="error", message=str(e), data=None)
     finally:
         db.close()

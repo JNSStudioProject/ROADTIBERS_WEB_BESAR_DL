@@ -15,7 +15,7 @@ export const mockViolationReports: ViolationReportItem[] = [
   {
     id: "RPT-002",
     timestamp: new Date(Date.now() - 7200000).toISOString(),
-    location: "Sudirman (MTQ)",
+    location: "Simpang SKA (Utara)",
     violation_type: "Pajak Mati",
     vehicle_type: "Mobil",
     plate_number: "BM 9999 XYZ",

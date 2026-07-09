@@ -18,10 +18,10 @@ export const mockTrafficDetections: TrafficDetectionResult[] = [
   {
     id: "DET-002",
     timestamp: new Date(Date.now() - 3600000).toISOString(),
-    location: "Sudirman (MTQ)",
+    location: "Simpang SKA (Utara)",
     condition: TRAFFIC_CONDITIONS.LANCAR,
     vehicle_count: 45,
-    image_url: "/sample-cases/sudirman-mtq.jpg",
+    image_url: "/sample-cases/simpang-ska-utara.jpg",
     status: DETECTION_STATUS.AMAN,
     objects: [
       { id: "OBJ-3", label: "Mobil", confidence: 0.98 },
@@ -33,7 +33,7 @@ export const mockVehicleDetections: VehicleDetection[] = [
   {
     id: "VEH-001",
     timestamp: new Date().toISOString(),
-    location: "Harapan Raya",
+    location: "Simpang SKA (Selatan)",
     plate_number: "BM 1234 ABC",
     vehicle_type: "Motor",
     tax_status: VEHICLE_STATUS.VALID,
@@ -43,7 +43,7 @@ export const mockVehicleDetections: VehicleDetection[] = [
   {
     id: "VEH-002",
     timestamp: new Date(Date.now() - 1800000).toISOString(),
-    location: "Panam (UNRI)",
+    location: "Simpang SKA (Timur)",
     plate_number: "BM 9999 XYZ",
     vehicle_type: "Mobil",
     tax_status: VEHICLE_STATUS.BERMASALAH,

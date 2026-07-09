@@ -7,22 +7,21 @@ export const historyKpis = [
   { label: "Risiko Tinggi", value: "18", unit: "Data", color: "text-red-600", helper: "Prioritas tindak lanjut." },
 ];
 
-export const historyRows = [
-  { time: "10:15", loc: "Simpang SKA", cat: "Pelanggaran", res: "Tanpa helm", count: "5", risk: "Tinggi", val: "Perlu validasi", note: "Cek ulang frame sample", follow: "Monitoring Pelanggaran" },
-  { time: "10:18", loc: "Panam (UNRI)", cat: "Kendaraan", res: "Motor terpantau", count: "24", risk: "Sedang", val: "Ditinjau", note: "Kepadatan mulai naik", follow: "Forecasting" },
-  { time: "10:22", loc: "Jl. Sudirman", cat: "Plat", res: "BM 2*** CD", count: "1", risk: "Sedang", val: "Perlu validasi", note: "Plat tidak jelas", follow: "Plate Monitoring" },
-  { time: "10:25", loc: "Harapan Raya", cat: "Plat", res: "BM 9*** RS", count: "1", risk: "Tinggi", val: "Perlu validasi", note: "Administrasi simulasi perlu pemeriksaan", follow: "Plate Monitoring" },
-  { time: "10:30", loc: "Simpang SKA", cat: "Rambu", res: "Dilarang berhenti", count: "1", risk: "Sedang", val: "Ditinjau", note: "Perhatikan area sekitar rambu", follow: "AI Detection" },
-  { time: "10:35", loc: "Jl. Sudirman", cat: "Pelanggaran", res: "Area berhenti", count: "1", risk: "Sedang", val: "Perlu validasi", note: "Cocokkan dengan rambu sekitar", follow: "Monitoring Pelanggaran" },
-  { time: "10:40", loc: "Simpang SKA", cat: "Forecasting", res: "Kemacetan 32 menit", count: "1", risk: "Tinggi", val: "Ditinjau", note: "Antisipasi periode siang", follow: "Forecasting" },
-  { time: "10:45", loc: "Harapan Raya", cat: "Kendaraan", res: "Volume meningkat", count: "1", risk: "Sedang", val: "Ditinjau", note: "Perlu pemantauan lanjutan", follow: "Dashboard" },
+export const validationQueue = [
+  { type: "Tanpa helm", count: "3 data perlu validasi", risk: "Tinggi" },
+  { type: "Plat tidak jelas", count: "2 data perlu cek ulang", risk: "Sedang" },
+  { type: "Boncengan > 2", count: "1 data perlu verifikasi", risk: "Tinggi" },
 ];
 
-export const validationQueue = [
-  { type: "Tanpa helm", count: "14 data perlu validasi", risk: "Tinggi" },
-  { type: "Administrasi simulasi", count: "5 data perlu pemeriksaan", risk: "Tinggi" },
-  { type: "Plat tidak jelas", count: "7 data perlu cek ulang", risk: "Sedang" },
-  { type: "Area berhenti", count: "4 data perlu verifikasi", risk: "Sedang" },
+export const historyRows = [
+  { time: "10:15", loc: "Simpang SKA (Utara)", cat: "Pelanggaran", res: "Tanpa helm", count: "1", risk: "Tinggi", val: "Perlu validasi", note: "Cek ulang frame sample", follow: "Monitoring Pelanggaran" },
+  { time: "10:18", loc: "Simpang SKA (Utara)", cat: "Kendaraan", res: "Motor terpantau", count: "8", risk: "Rendah", val: "Ditinjau", note: "Arus normal", follow: "Forecasting" },
+  { time: "10:22", loc: "Simpang SKA (Selatan)", cat: "Plat", res: "BM 2*** CD", count: "1", risk: "Sedang", val: "Perlu validasi", note: "Plat terhalang", follow: "Plate Monitoring" },
+  { time: "10:25", loc: "Simpang SKA (Timur)", cat: "Kendaraan", res: "Mobil terpantau", count: "4", risk: "Rendah", val: "Ditinjau", note: "Arus lancar", follow: "Dashboard" },
+  { time: "10:30", loc: "Simpang SKA (Selatan)", cat: "Rambu", res: "Batas Berhenti", count: "1", risk: "Sedang", val: "Ditinjau", note: "Dekat garis marka", follow: "AI Detection" },
+  { time: "10:35", loc: "Simpang SKA (Utara)", cat: "Pelanggaran", res: "Boncengan Tiga", count: "1", risk: "Tinggi", val: "Perlu validasi", note: "Verifikasi visual", follow: "Monitoring Pelanggaran" },
+  { time: "10:40", loc: "Simpang SKA (Selatan)", cat: "Forecasting", res: "Estimasi Normal", count: "1", risk: "Rendah", val: "Ditinjau", note: "Berdasarkan volume", follow: "Forecasting" },
+  { time: "10:45", loc: "Simpang SKA (Barat)", cat: "Pelanggaran", res: "Tanpa helm", count: "2", risk: "Tinggi", val: "Perlu validasi", note: "Pengendara dan penumpang", follow: "Dashboard" },
 ];
 
 export const riskTimeline = [
