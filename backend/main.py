@@ -111,7 +111,125 @@ async def analyze_all(file: UploadFile = File(...)):
             data=None
         )
 
-# 5. Forecasting Endpoint
+# 5. Forecasting Endpoint for Trip Planner
+@app.get("/forecasting/plan", response_model=ApiResponse)
+async def plan_trip(
+    origin: str, 
+    destination: str,
+    time_mode: str = "berangkat", 
+    target_time: str = "08:00", 
+    weather: str = "Cerah",
+    temp_c: float = 30.0
+):
+    if not predict_congestion:
+        return ApiResponse(status="error", message="Forecasting model not loaded", data=None)
+        
+    try:
+        from models.forecasting_kel9 import routes
+        route_info = routes.get((origin, destination))
+        if route_info is None:
+            distance, speed_ff = 5.0, 40
+        else:
+            distance, speed_ff, _, _, _ = route_info
+            
+        base_travel_time_minutes = int(distance / speed_ff * 60)
+        
+        now = datetime.now()
+        hour, minute = map(int, target_time.split(':'))
+        target_dt = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        
+        db = SessionLocal()
+        yolo_history = {}
+        try:
+            now_utc = datetime.utcnow()
+            twelve_hours_ago = now_utc - timedelta(hours=12)
+            records = db.query(DetectionHistory).filter(DetectionHistory.timestamp >= twelve_hours_ago).all()
+            for record in records:
+                if not record.results: continue
+                kendaraan_res = record.results.get('kendaraan', {})
+                if kendaraan_res.get('status') == 'success' and kendaraan_res.get('data'):
+                    hr = record.timestamp.hour
+                    yolo_history[hr] = yolo_history.get(hr, 0) + len(kendaraan_res['data'])
+        finally:
+            db.close()
+            
+        if time_mode == "tiba":
+            # Guess 1
+            guess_depart = target_dt - timedelta(minutes=base_travel_time_minutes)
+            target_hour_str = guess_depart.strftime("%H:00")
+            
+            res_guess = predict_congestion(
+                origin=origin, destination=destination, weather=weather,
+                temp_c=temp_c, target_hour_str=target_hour_str,
+                current_date=now.date(), yolo_history=yolo_history
+            )
+            
+            delay = res_guess["delay_minutes"] if res_guess else 0
+            total_travel_time = base_travel_time_minutes + delay
+            recommended_depart = target_dt - timedelta(minutes=total_travel_time)
+            
+            # Final prediction
+            res_final = predict_congestion(
+                origin=origin, destination=destination, weather=weather,
+                temp_c=temp_c, target_hour_str=recommended_depart.strftime("%H:00"),
+                current_date=now.date(), yolo_history=yolo_history
+            )
+            
+            delay_final = res_final["delay_minutes"] if res_final else 0
+            cat_final = res_final["category"] if res_final else "Tidak Diketahui"
+            risk_final = res_final["risk_level"] if res_final else "Rendah"
+            total_travel_time_final = base_travel_time_minutes + delay_final
+            recommended_depart_final = target_dt - timedelta(minutes=total_travel_time_final)
+            
+            return ApiResponse(
+                status="success",
+                message="Plan generated successfully",
+                data={
+                    "mode": "tiba",
+                    "target_arrival": target_time,
+                    "recommended_departure": recommended_depart_final.strftime("%H:%M"),
+                    "base_travel_time": base_travel_time_minutes,
+                    "delay_minutes": delay_final,
+                    "total_travel_time": total_travel_time_final,
+                    "congestion_category": cat_final,
+                    "risk_level": risk_final
+                }
+            )
+        else:
+            # time_mode == "berangkat"
+            target_hour_str = target_dt.strftime("%H:00")
+            res = predict_congestion(
+                origin=origin, destination=destination, weather=weather,
+                temp_c=temp_c, target_hour_str=target_hour_str,
+                current_date=now.date(), yolo_history=yolo_history
+            )
+            
+            delay = res["delay_minutes"] if res else 0
+            cat = res["category"] if res else "Tidak Diketahui"
+            risk = res["risk_level"] if res else "Rendah"
+            total_travel_time = base_travel_time_minutes + delay
+            arrival_time = target_dt + timedelta(minutes=total_travel_time)
+            
+            return ApiResponse(
+                status="success",
+                message="Plan generated successfully",
+                data={
+                    "mode": "berangkat",
+                    "departure_time": target_time,
+                    "estimated_arrival": arrival_time.strftime("%H:%M"),
+                    "base_travel_time": base_travel_time_minutes,
+                    "delay_minutes": delay,
+                    "total_travel_time": total_travel_time,
+                    "congestion_category": cat,
+                    "risk_level": risk
+                }
+            )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return ApiResponse(status="error", message=str(e), data=None)
+
+# 6. Forecasting Endpoint
 @app.get("/forecasting/current", response_model=ApiResponse)
 async def get_forecast(
     origin: str = "Simpang SKA", 

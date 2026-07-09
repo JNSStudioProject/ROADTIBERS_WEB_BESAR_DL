@@ -182,12 +182,15 @@ def predict_congestion(origin, destination, weather, temp_c, target_hour_str, cu
             if sim_v > 0:
                 recent_ratios.append(v / sim_v)
                 
-    vol_ratio = sum(recent_ratios) / len(recent_ratios) if recent_ratios else 1.0
+    vol_ratio = sum(recent_ratios) / len(recent_ratios) if recent_ratios else 0.0
     
     cf_target = get_congestion_factor(tipe, target_hour, is_weekend, is_hol, is_ram, is_mud)
     volume_pred_raw = get_volume_from_cf(cf_target, base_vol)
     volume_pred = int(volume_pred_raw * vol_ratio)
     
+    if vol_ratio == 0.0:
+        delay = 0.0
+        
     category = get_category(delay, distance)
 
     return {

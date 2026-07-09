@@ -10,7 +10,8 @@ MODEL_PATHS = {
     "boncengan": "weights/best_kelompok1_boncengan.pt",
     "plat": "weights/best_kelompok4_plat.pt",
     "pajak": "weights/best_kelompok5_pajak.pt",
-    "kendaraan": "weights/best_kelompok6_kendaraan.onnx"
+    "kendaraan": "weights/best_kelompok6_kendaraan.onnx",
+    "edukasi": "weights/best_edukasi.pt"
 }
 
 def load_all_models():
